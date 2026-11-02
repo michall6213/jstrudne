@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>Test cache</title>
+</head>
+<body>
+
+    <h1>Test pobierania danych</h1>
+    <button id="test">Pobierz dane</button>
+
+    <pre id="wynik"></pre>
+
+    <script>
+        let daneLokalne = {
+            userId: 1,
+            id: 1,
+            title: "Moje zadanie",
+            completed: false
+        };
+
+        async function fetchWithCache(url, ttlMs) {
+            let cache = localStorage.getItem(url);
+
+            if (cache !== null) {
+                cache = JSON.parse(cache);
+
+                if (Date.now() - cache.czas < ttlMs) {
+                    console.log("Dane z cache");
+                    return cache.dane;
+                }
+            }
+
+            try {
+                let dane = daneLokalne;
+
+                localStorage.setItem(url, JSON.stringify({
+                    czas: Date.now(),
+                    dane: dane
+                }));
+
+                console.log("Dane pobrane z lokalnego kodu");
+                return dane;
+
+            } catch (blad) {
+                if (cache !== null) {
+                    console.warn("Zwracam stare dane z cache");
+                    return cache.dane;
+                }
+
+                throw blad;
+            }
+        }
+
+        document.querySelector("#test").addEventListener("click", async function() {
+            try {
+                let dane = await fetchWithCache("mojeDane", 60000);
+
+                document.querySelector("#wynik").textContent =
+                    JSON.stringify(dane, null, 2);
+
+            } catch (blad) {
+                document.querySelector("#wynik").textContent =
+                    "Wystąpił błąd: " + blad.message;
+            }
+        });
+    </script>
+
+</body>
+</html>

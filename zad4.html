@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>Zadanie 4 - EventEmitter</title>
+</head>
+<body>
+    <h1>Własny EventEmitter</h1>
+    <pre id="wynik"></pre>
+
+    <script>
+        class EventEmitter {
+            constructor() {
+                this.zdarzenia = {};
+            }
+
+            on(eventName, listener) {
+                if (!this.zdarzenia[eventName]) {
+                    this.zdarzenia[eventName] = [];
+                }
+
+                this.zdarzenia[eventName].push(listener);
+            }
+
+            emit(eventName, ...args) {
+                if (this.zdarzenia[eventName]) {
+                    this.zdarzenia[eventName].forEach(function(listener) {
+                        listener(...args);
+                    });
+                }
+            }
+
+            off(eventName, listener) {
+                if (this.zdarzenia[eventName]) {
+                    this.zdarzenia[eventName] = this.zdarzenia[eventName].filter(
+                        function(funkcja) {
+                            return funkcja !== listener;
+                        }
+                    );
+                }
+            }
+
+            once(eventName, listener) {
+                let funkcja = (...args) => {
+                    this.off(eventName, funkcja);
+                    listener(...args);
+                };
+
+                this.on(eventName, funkcja);
+            }
+        }
+
+        let emitter = new EventEmitter();
+        let wynik = document.querySelector("#wynik");
+
+        function pokaz(tekst) {
+            wynik.textContent += tekst + "\n";
+        }
+
+        function powitanie(imie) {
+            pokaz("Cześć, " + imie + "!");
+        }
+
+        emitter.on("powitanie", powitanie);
+        emitter.emit("powitanie", "Anna");
+        emitter.off("powitanie", powitanie);
+        emitter.emit("powitanie", "Piotr");
+        emitter.once("wiadomosc", function(tekst) {
+            pokaz("Wiadomość: " + tekst);
+        });
+
+        emitter.emit("wiadomosc", "Pierwsza");
+        emitter.emit("wiadomosc", "Druga");
+    </script>
+</body>
+</html>

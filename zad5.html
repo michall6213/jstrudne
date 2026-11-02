@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>Zadanie 5 - Deep Clone</title>
+</head>
+<body>
+    <h1>Głębokie klonowanie obiektów</h1>
+    <pre id="wynik"></pre>
+
+    <script>
+        function deepClone(obj) {
+            if (obj === null || typeof obj !== "object") {
+                return obj;
+            }
+
+            let kopia;
+
+            if (Array.isArray(obj)) {
+                kopia = [];
+            } else {
+                kopia = {};
+            }
+
+            for (let klucz in obj) {
+                if (Object.prototype.hasOwnProperty.call(obj, klucz)) {
+                    kopia[klucz] = deepClone(obj[klucz]);
+                }
+            }
+
+            return kopia;
+        }
+
+        const dane = {
+            imie: "Anna",
+            wiek: 20,
+            adres: {
+                miasto: "Warszawa",
+                ulica: "Długa"
+            },
+            oceny: [5, 4, 6],
+            aktywny: true
+        };
+
+        const kopiaDanych = deepClone(dane);
+
+        kopiaDanych.adres.miasto = "Kraków";
+        kopiaDanych.oceny[0] = 2;
+
+        document.querySelector("#wynik").textContent =
+            "Oryginał:\n" + JSON.stringify(dane, null, 4) +
+            "\n\nKopia po zmianach:\n" + JSON.stringify(kopiaDanych, null, 4);
+    </script>
+</body>
+</html>
